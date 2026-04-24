@@ -1,8 +1,20 @@
-# State Machine
+# State Machine of Artifacts
 
-DRAFT → REVIEW → APPROVED → VERSIONED → SUPERSEDED
+## Estados
+- **DRAFT**: Artefato em fase inicial de criação, sem revisão.
+- **REVIEW**: Artefato pronto para ser revisado por pares ou auditores.
+- **APPROVED**: Artefato validado e pronto para ser integrado à branch principal.
+- **VERSIONED**: Artefato oficialmente integrado à `main` e parte da linha de base.
+- **SUPERSEDED**: Artefato que foi substituído por uma versão mais recente ou decisão superior.
 
-Regras:
-- Apenas APPROVED pode virar PR
-- VERSIONED só após merge
-- SUPERSEDED nunca é deletado
+## Transições Permitidas
+- DRAFT → REVIEW
+- REVIEW → APPROVED
+- REVIEW → DRAFT (se rejeitado)
+- APPROVED → VERSIONED
+- VERSIONED → SUPERSEDED
+
+## Transições Proibidas
+- DRAFT → APPROVED (pular revisão)
+- DRAFT → VERSIONED
+- SUPERSEDED → ANY (artefatos obsoletos não podem ser reativados sem novo ciclo)
