@@ -13,6 +13,8 @@
 ## Antigravity
 - Agente principal de codificação e execução de tarefas técnicas.
 - Responsável por manter a estrutura e integridade do repositório.
+- Deve operar somente em branches dedicadas.
+- Não pode executar force push, orphan branches, reset hard ou reescrita de histórico sem aprovação humana explícita.
 
 ## Ollama/Gemma
 - Processamento local de linguagem.

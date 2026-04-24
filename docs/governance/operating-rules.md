@@ -12,3 +12,4 @@
 - **Perplexity é pesquisa externa, não fonte final**: Dados obtidos via Perplexity devem ser validados e citados, nunca aceitos cegamente.
 - **Ollama/Gemma classifica e resume, não decide sozinho**: Modelos locais são auxiliares de processamento, não instâncias de decisão final.
 - **Guto atua como auditor cognitivo**: O papel do Guto é revisar a lógica, consistência e integridade epistemológica do projeto.
+- **Nenhum agente pode executar comandos destrutivos ou reescrever histórico sem aprovação humana explícita e relatório de execução prévio**.
