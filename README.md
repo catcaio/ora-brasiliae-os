@@ -38,5 +38,5 @@ Todos os artefatos e documentos devem ser classificados em um dos seguintes esta
 - [Regras Operacionais](./docs/governance/operating-rules.md)
 - [Política de Sincronização Notion-GitHub](./docs/governance/notion-github-sync-policy.md)
 - [Papéis e Ferramentas](./docs/governance/tool-roles.md)
-- [Registro de Decisões (ADRs)](./docs/adr/)
+- [Registro de Decisões (ADRs)](./docs/adr/) ([ADR-0002](./docs/adr/ADR-0002-architecture-governance.md))
 - [Relatórios de Execução](./reports/)
