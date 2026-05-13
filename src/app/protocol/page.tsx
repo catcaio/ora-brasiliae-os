@@ -81,7 +81,7 @@ export default function ProtocolPage() {
             <h3>Checklist NÃO Operar</h3>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.875rem' }}>
-            <div style={{ display: 'flex', gap: '0.5rem' }}><span>1.</span><span>Mercado em "moedor de carne" (lateralidade estreita)?</span></div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}><span>1.</span><span>Mercado em &quot;moedor de carne&quot; (lateralidade estreita)?</span></div>
             <div style={{ display: 'flex', gap: '0.5rem' }}><span>2.</span><span>Notícia de alto impacto em 5-10 minutos?</span></div>
             <div style={{ display: 'flex', gap: '0.5rem' }}><span>3.</span><span>Stop técnico maior que 150 pontos?</span></div>
             <div style={{ display: 'flex', gap: '0.5rem' }}><span>4.</span><span>Vontade de recuperar loss anterior (vingança)?</span></div>

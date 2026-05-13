@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { Header } from "@/components/layout";
 import { useMarketLab } from "@/hooks/use-market-lab";
-import { HYPOTHESES, calculatePoints, calculateCash, PROTOCOL } from "@/lib/constants";
-import { HypothesisId, TradeError } from "@/lib/types";
-import { Plus, Trash2, Image as ImageIcon } from "lucide-react";
+import { HYPOTHESES, calculatePoints, calculateCash } from "@/lib/constants";
+import { HypothesisId, TradeError, TradeSide } from "@/lib/types";
+import { Plus, Trash2 } from "lucide-react";
 
 export default function TradesPage() {
   const { trades, addTrade, deleteTrade } = useMarketLab();
@@ -16,7 +16,7 @@ export default function TradesPage() {
     entryTime: '',
     exitTime: '',
     hypothesisId: 'H1' as HypothesisId,
-    side: 'comprado' as 'comprado' | 'vendido',
+    side: 'comprado' as TradeSide,
     plannedPrice: 0,
     executedPrice: 0,
     technicalStop: 0,
@@ -46,8 +46,13 @@ export default function TradesPage() {
       cashResult: cash,
     };
 
-    addTrade(newTrade);
-    setShowForm(false);
+    try {
+      addTrade(newTrade);
+      setShowForm(false);
+    } catch (err) {
+      const error = err as Error;
+      alert(error.message || "Erro ao validar trade");
+    }
   };
 
   return (
@@ -90,7 +95,7 @@ export default function TradesPage() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label>Lado</label>
-              <select value={formData.side} onChange={e => setFormData({...formData, side: e.target.value as any})} className="card glass" style={{ padding: '0.5rem' }}>
+              <select value={formData.side} onChange={e => setFormData({...formData, side: e.target.value as TradeSide})} className="card glass" style={{ padding: '0.5rem' }}>
                 <option value="comprado">COMPRADO</option>
                 <option value="vendido">VENDIDO</option>
               </select>
@@ -135,7 +140,7 @@ export default function TradesPage() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label>Erro Operacional</label>
-              <select value={formData.errorType} onChange={e => setFormData({...formData, errorType: e.target.value as any})} className="card glass" style={{ padding: '0.5rem' }}>
+              <select value={formData.errorType} onChange={e => setFormData({...formData, errorType: e.target.value as TradeError})} className="card glass" style={{ padding: '0.5rem' }}>
                 <option value="nenhum">Nenhum</option>
                 <option value="estatístico">Estatístico</option>
                 <option value="técnico">Técnico</option>

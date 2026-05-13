@@ -1,6 +1,7 @@
 export type TradeError = 'estatístico' | 'técnico' | 'execução' | 'emocional' | 'nenhum';
 export type HypothesisId = 'H1' | 'H2' | 'H3' | 'H4' | 'H5' | 'H6' | 'H7' | 'H8' | 'H9' | 'H10';
 export type DayType = 'direcional' | 'lateral' | 'volátil';
+export type TradeSide = 'comprado' | 'vendido';
 
 export interface Hypothesis {
   id: HypothesisId;
@@ -23,7 +24,7 @@ export interface Trade {
   entryTime: string;
   exitTime: string;
   hypothesisId: HypothesisId;
-  side: 'comprado' | 'vendido';
+  side: TradeSide;
   plannedPrice: number;
   executedPrice: number;
   technicalStop: number;
@@ -91,4 +92,5 @@ export interface MarketStats {
   bestHypothesis: HypothesisId | null;
   worstHypothesis: HypothesisId | null;
   mostFrequentError: TradeError | null;
+  avgDisciplineScore: number;
 }

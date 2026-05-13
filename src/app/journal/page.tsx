@@ -8,7 +8,7 @@ import { DailyJournal, DayType } from "@/lib/types";
 import { Save, CheckCircle2, ClipboardList, Shield } from "lucide-react";
 
 export default function JournalPage() {
-  const { journals, addJournal } = useMarketLab();
+  const { addJournal } = useMarketLab();
   const [activeTab, setActiveTab] = useState<'context' | 'discipline' | 'audit'>('context');
 
   const [formData, setFormData] = useState<Partial<DailyJournal>>({
@@ -42,6 +42,21 @@ export default function JournalPage() {
       finalReading: '',
     }
   });
+
+  // Helper to update field and recalculate gap
+  const updateField = <K extends keyof DailyJournal>(field: K, value: DailyJournal[K]) => {
+    setFormData(prev => {
+      const next = { ...prev, [field]: value };
+      if (field === 'opening' || field === 'previousSettlement') {
+        const opening = Number(field === 'opening' ? value : prev.opening) || 0;
+        const settlement = Number(field === 'previousSettlement' ? value : prev.previousSettlement) || 0;
+        if (opening && settlement) {
+          next.gap = opening - settlement;
+        }
+      }
+      return next;
+    });
+  };
 
   const handleCheck = (index: number) => {
     const newList = [...(formData.disciplineChecklist || [])];
@@ -88,11 +103,11 @@ export default function JournalPage() {
                 <div className="grid grid-2">
                    <div>
                     <label>Data</label>
-                    <input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
+                    <input type="date" value={formData.date} onChange={e => updateField('date', e.target.value)} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
                   </div>
                   <div>
                     <label>Tipo de Dia</label>
-                    <select value={formData.dayType} onChange={e => setFormData({...formData, dayType: e.target.value as any})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}>
+                    <select value={formData.dayType} onChange={e => updateField('dayType', e.target.value as DayType)} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}>
                       <option value="lateral">Lateral</option>
                       <option value="direcional">Direcional</option>
                       <option value="volátil">Volátil</option>
@@ -102,59 +117,83 @@ export default function JournalPage() {
                 
                 <div>
                   <label>Contexto Macro</label>
-                  <textarea value={formData.macroContext} onChange={e => setFormData({...formData, macroContext: e.target.value})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} rows={3} placeholder="O que está movendo o mundo hoje?"></textarea>
+                  <textarea value={formData.macroContext} onChange={e => updateField('macroContext', e.target.value)} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} rows={3} placeholder="O que está movendo o mundo hoje?"></textarea>
                 </div>
 
-                <div className="grid grid-2">
+                <div className="grid grid-3">
                   <div>
                     <label>S&P 500 / Nasdaq</label>
-                    <input type="text" value={formData.spNasdaq} onChange={e => setFormData({...formData, spNasdaq: e.target.value})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
+                    <input type="text" value={formData.spNasdaq} onChange={e => updateField('spNasdaq', e.target.value)} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
                   </div>
                   <div>
-                    <label>Dólar Futuro</label>
-                    <input type="text" value={formData.dollarFuture} onChange={e => setFormData({...formData, dollarFuture: e.target.value})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
+                    <label>D\u00F3lar Futuro</label>
+                    <input type="text" value={formData.dollarFuture} onChange={e => updateField('dollarFuture', e.target.value)} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
+                  </div>
+                  <div>
+                    <label>DI / Juros</label>
+                    <input type="text" value={formData.diInterest} onChange={e => updateField('diInterest', e.target.value)} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
                   </div>
                 </div>
 
                 <div>
                   <label>Agenda Econômica</label>
-                  <input type="text" value={formData.economicAgenda} onChange={e => setFormData({...formData, economicAgenda: e.target.value})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} placeholder="Principais notícias (horários)" />
+                  <input type="text" value={formData.economicAgenda} onChange={e => updateField('economicAgenda', e.target.value)} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} placeholder="Principais notícias (horários)" />
                 </div>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                <div className="grid grid-2">
+                <div className="grid grid-3">
+                  <div>
+                    <label>Ajuste Anterior</label>
+                    <input type="number" value={formData.previousSettlement} onChange={e => updateField('previousSettlement', Number(e.target.value))} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
+                  </div>
                   <div>
                     <label>Abertura</label>
-                    <input type="number" value={formData.opening} onChange={e => setFormData({...formData, opening: Number(e.target.value)})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
+                    <input type="number" value={formData.opening} onChange={e => updateField('opening', Number(e.target.value))} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
                   </div>
                   <div>
-                    <label>VWAP</label>
-                    <input type="number" value={formData.vwap} onChange={e => setFormData({...formData, vwap: Number(e.target.value)})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
+                    <label>Gap (pts)</label>
+                    <input type="number" value={formData.gap} onChange={e => updateField('gap', Number(e.target.value))} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
                   </div>
+                </div>
+
+                <div className="grid grid-4">
                   <div>
                     <label>Máxima</label>
-                    <input type="number" value={formData.high} onChange={e => setFormData({...formData, high: Number(e.target.value)})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
+                    <input type="number" value={formData.high} onChange={e => updateField('high', Number(e.target.value))} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
                   </div>
                   <div>
                     <label>Mínima</label>
-                    <input type="number" value={formData.low} onChange={e => setFormData({...formData, low: Number(e.target.value)})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
+                    <input type="number" value={formData.low} onChange={e => updateField('low', Number(e.target.value))} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
                   </div>
+                  <div>
+                    <label>VWAP</label>
+                    <input type="number" value={formData.vwap} onChange={e => updateField('vwap', Number(e.target.value))} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
+                  </div>
+                  <div>
+                    <label>Volume</label>
+                    <input type="text" value={formData.volume} onChange={e => updateField('volume', e.target.value)} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
+                  </div>
+                </div>
+
+                <div>
+                  <label>Tend\u00EAncia Inicial</label>
+                  <input type="text" value={formData.initialTrend} onChange={e => updateField('initialTrend', e.target.value)} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} placeholder="Ex: Gap de alta com barra de força" />
                 </div>
 
                 <div>
                   <label>Hipótese Principal</label>
-                  <input type="text" value={formData.mainHypothesis} onChange={e => setFormData({...formData, mainHypothesis: e.target.value})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} placeholder="Qual o plano para hoje?" />
+                  <input type="text" value={formData.mainHypothesis} onChange={e => updateField('mainHypothesis', e.target.value)} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} placeholder="Qual o plano para hoje?" />
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <label>Operar Hoje?</label>
-                  <input type="checkbox" checked={formData.shouldTrade} onChange={e => setFormData({...formData, shouldTrade: e.target.checked})} />
+                  <input type="checkbox" checked={formData.shouldTrade} onChange={e => updateField('shouldTrade', e.target.checked)} />
                 </div>
 
                 <div>
                   <label>Justificativa</label>
-                  <textarea value={formData.justification} onChange={e => setFormData({...formData, justification: e.target.value})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} rows={2}></textarea>
+                  <textarea value={formData.justification} onChange={e => updateField('justification', e.target.value)} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} rows={2}></textarea>
                 </div>
               </div>
             </div>
@@ -205,25 +244,25 @@ export default function JournalPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 <div>
                   <label>Correlação Observada</label>
-                  <input type="text" value={formData.audit?.observedCorrelation} onChange={e => setFormData({...formData, audit: {...formData.audit!, observedCorrelation: e.target.value}})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
+                  <input type="text" value={formData.audit?.observedCorrelation} onChange={e => updateField('audit', {...formData.audit!, observedCorrelation: e.target.value})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
                 </div>
                 <div>
                   <label>Ruído Dominante</label>
-                  <input type="text" value={formData.audit?.dominantNoise} onChange={e => setFormData({...formData, audit: {...formData.audit!, dominantNoise: e.target.value}})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
+                  <input type="text" value={formData.audit?.dominantNoise} onChange={e => updateField('audit', {...formData.audit!, dominantNoise: e.target.value})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
                 </div>
                 <div>
                   <label>Horizonte da Operação</label>
-                  <input type="text" value={formData.audit?.operationHorizon} onChange={e => setFormData({...formData, audit: {...formData.audit!, operationHorizon: e.target.value}})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
+                  <input type="text" value={formData.audit?.operationHorizon} onChange={e => updateField('audit', {...formData.audit!, operationHorizon: e.target.value})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 <div>
                   <label>Limite de Coerência</label>
-                  <input type="text" value={formData.audit?.coherenceLimit} onChange={e => setFormData({...formData, audit: {...formData.audit!, coherenceLimit: e.target.value}})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
+                  <input type="text" value={formData.audit?.coherenceLimit} onChange={e => updateField('audit', {...formData.audit!, coherenceLimit: e.target.value})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} />
                 </div>
                 <div>
                   <label>Leitura Final</label>
-                  <textarea value={formData.audit?.finalReading} onChange={e => setFormData({...formData, audit: {...formData.audit!, finalReading: e.target.value}})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} rows={5}></textarea>
+                  <textarea value={formData.audit?.finalReading} onChange={e => updateField('audit', {...formData.audit!, finalReading: e.target.value})} className="card glass" style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }} rows={5}></textarea>
                 </div>
               </div>
             </div>

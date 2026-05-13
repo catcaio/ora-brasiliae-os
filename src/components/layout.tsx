@@ -6,10 +6,8 @@ import {
   LayoutDashboard, 
   BookOpen, 
   TrendingUp, 
-  Settings, 
   ShieldCheck, 
   Info,
-  CheckSquare
 } from 'lucide-react';
 
 export function Sidebar() {
@@ -72,9 +70,10 @@ export function Header({ title }: { title: string }) {
       marginBottom: '2rem' 
     }}>
       <h1>{title}</h1>
-      <div style={{ display: 'flex', gap: '1rem' }}>
-        <div className="badge badge-warning">WIN FUTURE</div>
-        <div className="badge badge-success">SESSÃO ATIVA</div>
+      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div className="badge badge-warning" style={{ opacity: 0.8 }}>SANDBOX EDUCACIONAL</div>
+        <div className="badge badge-info">WIN FUTURE</div>
+        <div className="badge badge-success">SESS\u00C3O ATIVA</div>
       </div>
     </header>
   );

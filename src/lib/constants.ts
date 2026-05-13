@@ -1,4 +1,4 @@
-import { Hypothesis, HypothesisId, MarketStats, Trade } from './types';
+import { DailyJournal, Hypothesis, HypothesisId, MarketStats, Trade, TradeError } from './types';
 
 export const PROTOCOL = {
   POINTS_VALUE: 0.20,
@@ -172,7 +172,59 @@ export function calculateCash(points: number, contracts: number = 1): number {
   return points * PROTOCOL.POINTS_VALUE * contracts;
 }
 
-export function calculateStats(trades: Trade[]): MarketStats {
+export type TradeValidationResult = {
+  valid: boolean;
+  alert?: string;
+  autoObservation?: string;
+};
+
+export function validateTrade(trade: Trade, dailyTrades: Trade[]): TradeValidationResult {
+  // Rule: Max trades per day
+  if (dailyTrades.length >= PROTOCOL.MAX_DAILY_TRADES) {
+    return {
+      valid: false,
+      alert: `Alerta: Limite de ${PROTOCOL.MAX_DAILY_TRADES} trades por dia atingido.`,
+    };
+  }
+
+  // Rule: 2 losses in a row
+  const sortedDailyTrades = [...dailyTrades, trade].sort((a, b) => a.entryTime.localeCompare(b.entryTime));
+  let consecutiveLosses = 0;
+  let hasTwoConsecutiveLosses = false;
+  for (const t of sortedDailyTrades) {
+    if (t.pointsResult < 0) {
+      consecutiveLosses++;
+      if (consecutiveLosses >= 2) {
+        hasTwoConsecutiveLosses = true;
+        break;
+      }
+    } else {
+      consecutiveLosses = 0;
+    }
+  }
+
+  // Rule: Daily loss block (including current trade)
+  const dailyPointsAfterTrade = dailyTrades.reduce((acc, t) => acc + t.pointsResult, 0) + trade.pointsResult;
+  if (dailyPointsAfterTrade < -PROTOCOL.MAX_DAILY_LOSS_POINTS) {
+    return {
+      valid: false,
+      alert: `Bloqueio: Esta opera\u00E7\u00E3o levaria a uma perda de ${Math.abs(dailyPointsAfterTrade)} pontos, excedendo o limite de ${PROTOCOL.MAX_DAILY_LOSS_POINTS}. Opera\u00E7\u00E3o bloqueada.`,
+    };
+  }
+
+  let autoObservation = '';
+  if (trade.technicalStop > PROTOCOL.MAX_STOP_POINTS) {
+    autoObservation = ' [Trade inv\u00E1lido pelo protocolo: Stop > 150 pts]';
+  }
+
+  return {
+    valid: true,
+    alert: hasTwoConsecutiveLosses ? 'Aten\u00E7\u00E3o: 2 losses consecutivos detectados. Protocolo exige encerramento da sess\u00E3o.' : undefined,
+    autoObservation,
+  };
+}
+
+export function calculateStats(trades: Trade[], journals: DailyJournal[] = []): MarketStats {
   const winners = trades.filter(t => t.pointsResult > 0);
   const losers = trades.filter(t => t.pointsResult < 0);
   const total = trades.length;
@@ -183,7 +235,7 @@ export function calculateStats(trades: Trade[]): MarketStats {
   const payoff = avgLoss > 0 ? avgGain / avgLoss : 0;
   const winRate = total > 0 ? winners.length / total : 0;
 
-  // Expectativa Matemática: (WinRate * AvgGain) - (LossRate * AvgLoss)
+  // Expectativa Matem\u00E1tica: (WinRate * AvgGain) - (LossRate * AvgLoss)
   const mathExpectation = (winRate * avgGain) - ((1 - winRate) * avgLoss);
 
   // Simplified Max Drawdown and Loss Streak (can be improved)
@@ -214,7 +266,7 @@ export function calculateStats(trades: Trade[]): MarketStats {
     acc[e] = (acc[e] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
-  const mostFrequentError = (Object.keys(errorCounts).sort((a, b) => errorCounts[b] - errorCounts[a])[0] as any) || 'nenhum';
+  const mostFrequentError = (Object.keys(errorCounts).sort((a, b) => errorCounts[b] - errorCounts[a])[0] as TradeError) || 'nenhum';
 
   // Best/Worst Hypothesis
   const hypoStats = trades.reduce((acc, t) => {
@@ -224,6 +276,11 @@ export function calculateStats(trades: Trade[]): MarketStats {
   }, {} as Record<HypothesisId, number>);
   const bestHypo = (Object.keys(hypoStats).sort((a, b) => hypoStats[b as HypothesisId] - hypoStats[a as HypothesisId])[0] as HypothesisId) || null;
   const worstHypo = (Object.keys(hypoStats).sort((a, b) => hypoStats[a as HypothesisId] - hypoStats[b as HypothesisId])[0] as HypothesisId) || null;
+
+  // Avg Discipline Score
+  const avgDiscipline = journals.length > 0 
+    ? journals.reduce((acc, j) => acc + (j.disciplineScore || 0), 0) / journals.length 
+    : 0;
 
   return {
     totalTrades: total,
@@ -240,5 +297,6 @@ export function calculateStats(trades: Trade[]): MarketStats {
     bestHypothesis: bestHypo,
     worstHypothesis: worstHypo,
     mostFrequentError,
+    avgDisciplineScore: avgDiscipline,
   };
 }

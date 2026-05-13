@@ -1,25 +1,26 @@
-import { useState, useEffect } from 'react';
-import { DailyJournal, Trade, MarketStats } from '../lib/types';
-import { calculateStats, PROTOCOL } from '../lib/constants';
+import { useState, useEffect, useMemo } from 'react';
+import { DailyJournal, Trade } from '../lib/types';
+import { calculateStats, validateTrade } from '../lib/constants';
 
 export function useMarketLab() {
-  const [journals, setJournals] = useState<DailyJournal[]>([]);
-  const [trades, setTrades] = useState<Trade[]>([]);
-  const [stats, setStats] = useState<MarketStats>(calculateStats([]));
+  const [journals, setJournals] = useState<DailyJournal[]>(() => {
+    if (typeof window === 'undefined') return [];
+    const saved = localStorage.getItem('market_lab_journals');
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  // Load from localStorage
-  useEffect(() => {
-    const savedJournals = localStorage.getItem('market_lab_journals');
-    const savedTrades = localStorage.getItem('market_lab_trades');
-    if (savedJournals) setJournals(JSON.parse(savedJournals));
-    if (savedTrades) setTrades(JSON.parse(savedTrades));
-  }, []);
+  const [trades, setTrades] = useState<Trade[]>(() => {
+    if (typeof window === 'undefined') return [];
+    const saved = localStorage.getItem('market_lab_trades');
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  // Save to localStorage and update stats
+  const stats = useMemo(() => calculateStats(trades, journals), [trades, journals]);
+
+  // Save to localStorage
   useEffect(() => {
     localStorage.setItem('market_lab_journals', JSON.stringify(journals));
     localStorage.setItem('market_lab_trades', JSON.stringify(trades));
-    setStats(calculateStats(trades));
   }, [journals, trades]);
 
   const addJournal = (journal: DailyJournal) => {
@@ -27,27 +28,19 @@ export function useMarketLab() {
   };
 
   const addTrade = (trade: Trade) => {
-    // Validation logic
     const dailyTrades = trades.filter(t => t.date === trade.date);
-    
-    if (dailyTrades.length >= PROTOCOL.MAX_DAILY_TRADES) {
-      alert(`Alerta: Limite de ${PROTOCOL.MAX_DAILY_TRADES} trades por dia atingido.`);
-      return;
+    const validation = validateTrade(trade, dailyTrades);
+
+    if (!validation.valid) {
+      throw new Error(validation.alert);
     }
 
-    const newDailyLosses = dailyTrades.filter(t => t.pointsResult < 0).length + (trade.pointsResult < 0 ? 1 : 0);
-    if (newDailyLosses >= 2) {
-      alert('Atenção: 2 losses acumulados no dia. Protocolo exige encerramento da sessão.');
+    if (validation.alert) {
+      alert(validation.alert);
     }
 
-    const dailyPoints = dailyTrades.reduce((acc, t) => acc + t.pointsResult, 0);
-    if (dailyPoints <= -PROTOCOL.MAX_DAILY_LOSS_POINTS) {
-      alert(`Bloqueio: Perda diária de ${PROTOCOL.MAX_DAILY_LOSS_POINTS} pontos atingida. Operações suspensas.`);
-      return;
-    }
-
-    if (trade.technicalStop > PROTOCOL.MAX_STOP_POINTS) {
-      trade.observation = (trade.observation || '') + ' [Trade inválido pelo protocolo: Stop > 150 pts]';
+    if (validation.autoObservation) {
+      trade.observation = (trade.observation || '') + validation.autoObservation;
     }
 
     setTrades(prev => [...prev, trade]);

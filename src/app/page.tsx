@@ -55,7 +55,7 @@ export default function Dashboard() {
             <p style={{ fontSize: '0.75rem', fontWeight: 600 }}>DISCIPLINA</p>
             <Shield size={16} color="var(--info)" />
           </div>
-          <h2>8.5</h2>
+          <h2>{stats.avgDisciplineScore > 0 ? stats.avgDisciplineScore.toFixed(1) : 'N/A'}</h2>
           <p style={{ fontSize: '0.875rem', marginTop: '0.25rem' }}>
             {stats.outOfPlanTrades} fora do plano
           </p>
