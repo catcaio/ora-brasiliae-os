@@ -1,0 +1,31 @@
+name: Validate Pull Request
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  validate-pr-body:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate required PR sections
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const requiredHeaders = [
+              '## Origem',
+              '## Objetivo',
+              '## Escopo',
+              '## Validação',
+              '## Evidências',
+              '## Riscos'
+            ];
+
+            const body = context.payload.pull_request.body || '';
+            const missing = requiredHeaders.filter((header) => !body.includes(header));
+
+            if (missing.length > 0) {
+              core.setFailed(`PR incompleto. Seções ausentes: ${missing.join(', ')}`);
+            } else {
+              core.info('PR contém todas as seções obrigatórias.');
+            }
