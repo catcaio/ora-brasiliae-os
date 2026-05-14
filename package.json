@@ -7,6 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "market:validate-snapshot": "tsx scripts/validate-win-snapshot.ts",
+    "market:daily-report": "tsx scripts/generate-market-lab-report.ts",
+    "jules:daily-win-audit": "tsx scripts/jules/run-daily-win-audit.ts",
     "test": "vitest run"
   },
   "dependencies": {
@@ -23,6 +27,7 @@
     "@vitest/ui": "^4.1.6",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "tsx": "^4.22.0",
     "typescript": "^5",
     "vitest": "^4.1.6"
   }
