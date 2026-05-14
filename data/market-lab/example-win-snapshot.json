@@ -1,0 +1,21 @@
+{
+  "date": "2026-05-13",
+  "asset": "WIN",
+  "contract": "WINM26",
+  "previousSettlement": null,
+  "opening": null,
+  "high": null,
+  "low": null,
+  "close": null,
+  "volume": null,
+  "vwap": null,
+  "dollarFuture": null,
+  "ibovespaSpot": null,
+  "sp500": null,
+  "nasdaq": null,
+  "economicAgenda": [],
+  "relevantNews": [],
+  "source": "manual",
+  "quality": "partial",
+  "missingFields": []
+}
