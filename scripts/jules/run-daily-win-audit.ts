@@ -7,7 +7,6 @@ function main() {
   
   const today = new Date().toISOString().split("T")[0];
   const snapshotPath = path.resolve(`data/market-lab/${today}-win-snapshot.json`);
-  const examplePath = path.resolve("data/market-lab/example-win-snapshot.json");
 
   if (!fs.existsSync(snapshotPath)) {
     console.warn(`[WARNING] Snapshot for today (${today}) not found at ${snapshotPath}.`);
@@ -53,7 +52,7 @@ function main() {
 
     console.log(`[SUCCESS] Audit completed for ${today}.`);
     console.log(`[NEXT STEPS] Jules should now register evidence in Linear and update GitHub if needed.`);
-  } catch (error) {
+  } catch {
     console.error(`[FAILURE] Audit failed for ${today}. Check the errors above.`);
     process.exit(1);
   }
