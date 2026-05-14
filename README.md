@@ -23,6 +23,11 @@ npm run dev
 
 ---
 
+## Branch canônica atual
+- **Branch padrão:** `governance/bootstrap`.
+- **Base obrigatória para PRs:** `governance/bootstrap`.
+- **`main` preservada para normalização futura:** não usar `main` como destino automático nesta etapa.
+
 ## Prop\u00F3sito
 Este reposit\u00F3rio \u00E9 o n\u00FAcleo operacional e cient\u00EDfico do projeto **Ora Brasiliae**, integrando governan\u00E7a de software (CONDSTORE OS) e rigor de pesquisa cient\u00EDfica. O objetivo \u00E9 criar um ambiente totalmente audit\u00E1vel, reprodut\u00EDvel e governado por princ\u00EDpios de integridade epistemol\u00F3gica.
 
