@@ -1,0 +1,105 @@
+# Ora Brasiliae Market Lab — Daily WIN Snapshot Audit
+# BRASIL-4: Configurar Jules Scheduled Task diário do Market Lab
+#
+# Agendamento: Dias úteis (seg–sex) às 18:30 BRT (21:30 UTC)
+# Branch base: governance/bootstrap
+# Issue Linear: BRASIL-4
+#
+# Pré-requisito: Secret JULES_API configurado em
+#   Settings → Secrets and variables → Actions → JULES_API
+#
+# Geração da chave: jules.google.com → Settings → API Keys
+
+name: Ora Brasiliae — Daily WIN Snapshot Audit (Jules)
+
+on:
+  # Dias úteis (seg=1, sex=5) às 21:30 UTC = 18:30 BRT
+  schedule:
+    - cron: '30 21 * * 1-5'
+  # Permite disparo manual para dry-run / teste
+  workflow_dispatch:
+
+jobs:
+  jules-daily-win-audit:
+    name: Jules — Daily WIN Snapshot Audit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Invoke Jules — Daily WIN Snapshot Audit
+        uses: google-labs-code/jules-invoke@v1
+        with:
+          jules_api_key: ${{ secrets.JULES_API }}
+          starting_branch: governance/bootstrap
+          include_last_commit: 'false'
+          include_commit_log: 'false'
+          prompt: |
+            # Jules: Daily WIN Snapshot Audit
+            # Ora Brasiliae Market Lab — BRASIL-4
+            # Branch base: governance/bootstrap
+            # Issue Linear: BRASIL-4
+            # Modo: sandbox educacional
+            # Jules atua como auditor operacional, NÃO como fonte de dados.
+
+            Você é um agente de auditoria operacional do Ora Brasiliae Market Lab.
+            Sua missão é validar os dados diários do contrato futuro de mini-índice (WIN)
+            e gerar relatórios de integridade.
+
+            ## Fluxo de Trabalho
+
+            1. **Localizar Snapshot:**
+               - Procure o arquivo de dados do dia em `data/market-lab/YYYY-MM-DD-win-snapshot.json`
+                 (substitua YYYY-MM-DD pela data atual de execução).
+               - Se não existir, prossiga para reportar a ausência.
+
+            2. **Executar Auditoria:**
+               - Utilize o comando: `npm run jules:daily-win-audit`
+               - Este comando validará a estrutura e gerará um relatório em markdown
+                 em `reports/market-lab/`.
+
+            3. **Análise de Qualidade:**
+               - Verifique o campo `quality` no resultado.
+               - `complete`: Dados íntegros.
+               - `partial`: Faltam campos não críticos.
+               - `insufficient`: Faltam campos críticos (Abertura, Máxima, Mínima, Fechamento)
+                 ou snapshot ausente.
+
+            4. **Registro de Evidências:**
+               - Vincule a execução à issue do Linear BRASIL-4.
+               - Anexe o conteúdo do relatório gerado como comentário na issue.
+               - Se houver alterações versionáveis (ex: novo relatório), abra ou atualize
+                 uma Pull Request contra `governance/bootstrap`.
+
+            ## Restrições Críticas
+
+            - NÃO invente dados ausentes. Reporte-os como `null`.
+            - NÃO busque dados externos de fontes não autorizadas nesta versão (V1).
+            - NÃO faça recomendações de compra ou venda (trade).
+            - NÃO execute ordens em corretoras.
+            - NÃO trate a si mesmo como fonte primária de dados. Você é o auditor, não o oráculo.
+            - NÃO use snapshot de exemplo como dado do dia real.
+            - NÃO abra PR contra `main`. Use exclusivamente `governance/bootstrap` como base.
+
+            ## Comportamento quando snapshot não existe
+
+            - Gerar relatório de ausência em `reports/market-lab/YYYY-MM-DD-win-report.md`.
+            - Classificar como `insufficient`.
+            - Registrar claramente que o dado do dia não foi fornecido.
+
+            ## Se houver alteração versionável
+
+            - Criar branch específica a partir de `governance/bootstrap`.
+            - Abrir PR contra `governance/bootstrap` com corpo contendo:
+              - ## Origem
+              - ## Objetivo
+              - ## Escopo
+              - ## Validação
+              - ## Evidências
+              - ## Riscos
+
+            ## Comandos Úteis
+
+            - Validar snapshot específico: `npm run market:validate-snapshot -- path/to/file.json`
+            - Gerar relatório específico: `npm run market:daily-report -- path/to/file.json`
+            - Pipeline completo: `npm run jules:daily-win-audit`
