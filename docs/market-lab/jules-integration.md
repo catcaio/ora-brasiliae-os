@@ -43,6 +43,78 @@ As seguintes variáveis devem ser configuradas no `.env`:
 - Validação estritamente documental e lógica básica.
 - Não há integração direta com corretoras.
 
+## Scheduled Task diária
+
+A auditoria diária é executada automaticamente via **GitHub Actions** + **Jules API** (`google-labs-code/jules-invoke@v1`).
+
+### Configuração
+
+| Campo | Valor |
+|-------|-------|
+| **Nome da tarefa** | `Ora Brasiliae Market Lab — Daily WIN Snapshot Audit` |
+| **Workflow** | `.github/workflows/jules-daily-win-audit.yml` |
+| **Frequência** | Dias úteis (segunda a sexta) |
+| **Horário** | 18:30 BRT (21:30 UTC — cron: `30 21 * * 1-5`) |
+| **Branch base** | `governance/bootstrap` |
+| **Issue Linear** | BRASIL-4 |
+| **Prompt** | Conteúdo de `prompts/jules/daily-win-snapshot-audit.md` |
+
+### Pré-requisito: API Key
+
+O secret `JULES_API` deve estar configurado no repositório:
+
+1. Acesse [jules.google.com](https://jules.google.com) → **Settings** → **API Keys**
+2. Gere uma chave (máximo 3 ativas simultâneas)
+3. No GitHub: **Settings** → **Secrets and variables** → **Actions** → `JULES_API`
+
+### Comportamento quando snapshot existe
+
+1. Jules atualiza checkout de `governance/bootstrap`
+2. Localiza `data/market-lab/YYYY-MM-DD-win-snapshot.json`
+3. Executa `npm run jules:daily-win-audit`
+4. Gera relatório em `reports/market-lab/YYYY-MM-DD-win-report.md`
+5. Classifica qualidade como `complete`, `partial` ou `insufficient`
+6. Registra evidência na issue Linear BRASIL-4
+7. Abre PR contra `governance/bootstrap` se houver artefato versionável
+
+### Comportamento quando snapshot não existe
+
+1. Gera relatório de ausência: `reports/market-lab/YYYY-MM-DD-win-report.md`
+2. Classifica como `insufficient`
+3. Registra que o dado do dia não foi fornecido
+4. **Não usa snapshot de exemplo como fallback**
+5. **Não inventa dados**
+
+### Como auditar execuções
+
+- Acesse **Actions** → `Ora Brasiliae — Daily WIN Snapshot Audit (Jules)` no GitHub
+- Verifique logs do job `jules-daily-win-audit`
+- Consulte os comentários na issue Linear BRASIL-4
+
+### Como disparar manualmente (dry-run)
+
+```bash
+# Via GitHub CLI
+gh workflow run jules-daily-win-audit.yml
+
+# Via npm (execução local sem Jules)
+npm run jules:daily-win-audit
+```
+
+### Como pausar/desativar a task
+
+- **Temporariamente:** No GitHub Actions → selecione o workflow → **Disable workflow**
+- **Permanentemente:** Remova ou comente o bloco `schedule:` no arquivo `.github/workflows/jules-daily-win-audit.yml`
+
+### Limitações da V1
+
+- Jules não busca dados externos (ex: APIs de mercado B3)
+- Não há integração com corretoras
+- A tarefa não executa em feriados — apenas filtra dias da semana (seg–sex)
+- O secret `JULES_API` tem validade conforme política da Google Jules API
+
+---
+
 ## Próximos Passos
 
 - Integração com APIs oficiais para cross-check automático.
