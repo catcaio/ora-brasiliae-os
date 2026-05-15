@@ -61,11 +61,11 @@ A auditoria diária é executada automaticamente via **GitHub Actions** + **Jule
 
 ### Pré-requisito: API Key
 
-O secret `JULES_API_KEY` deve estar configurado no repositório:
+O secret `JULES_API` deve estar configurado no repositório:
 
 1. Acesse [jules.google.com](https://jules.google.com) → **Settings** → **API Keys**
 2. Gere uma chave (máximo 3 ativas simultâneas)
-3. No GitHub: **Settings** → **Secrets and variables** → **Actions** → `JULES_API_KEY`
+3. No GitHub: **Settings** → **Secrets and variables** → **Actions** → `JULES_API`
 
 ### Comportamento quando snapshot existe
 
@@ -111,7 +111,7 @@ npm run jules:daily-win-audit
 - Jules não busca dados externos (ex: APIs de mercado B3)
 - Não há integração com corretoras
 - A tarefa não executa em feriados — apenas filtra dias da semana (seg–sex)
-- O secret `JULES_API_KEY` tem validade conforme política da Google Jules API
+- O secret `JULES_API` tem validade conforme política da Google Jules API
 
 ---
 

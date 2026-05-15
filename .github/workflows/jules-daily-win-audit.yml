@@ -5,8 +5,8 @@
 # Branch base: governance/bootstrap
 # Issue Linear: BRASIL-4
 #
-# Pré-requisito: Secret JULES_API_KEY configurado em
-#   Settings → Secrets and variables → Actions → JULES_API_KEY
+# Pré-requisito: Secret JULES_API configurado em
+#   Settings → Secrets and variables → Actions → JULES_API
 #
 # Geração da chave: jules.google.com → Settings → API Keys
 
@@ -30,7 +30,7 @@ jobs:
       - name: Invoke Jules — Daily WIN Snapshot Audit
         uses: google-labs-code/jules-invoke@v1
         with:
-          jules_api_key: ${{ secrets.JULES_API_KEY }}
+          jules_api_key: ${{ secrets.JULES_API }}
           starting_branch: governance/bootstrap
           include_last_commit: 'false'
           include_commit_log: 'false'
